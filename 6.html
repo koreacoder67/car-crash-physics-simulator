@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6학년 수학 놀이터</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Jua (Cute and playful Korean font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#bae6fd 2px, transparent 2px);
+            background-size: 30px 30px;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* 3D Button Effect */
+        .btn-3d {
+            transition: all 0.1s ease-in-out;
+            position: relative;
+            top: 0;
+        }
+        .btn-3d:active, .btn-3d.active-press {
+            top: 4px;
+        }
+
+        /* Color Variations for 3D Buttons */
+        .btn-yellow { background-color: #fde047; box-shadow: 0 6px 0 #eab308; color: #713f12; }
+        .btn-yellow:active, .btn-yellow.active-press { box-shadow: 0 2px 0 #eab308; }
+
+        .btn-green { background-color: #86efac; box-shadow: 0 6px 0 #22c55e; color: #14532d; }
+        .btn-green:active, .btn-green.active-press { box-shadow: 0 2px 0 #22c55e; }
+
+        .btn-pink { background-color: #f9a8d4; box-shadow: 0 6px 0 #db2777; color: #831843; }
+        .btn-pink:active, .btn-pink.active-press { box-shadow: 0 2px 0 #db2777; }
+        
+        .btn-blue { background-color: #93c5fd; box-shadow: 0 6px 0 #3b82f6; color: #1e3a8a; }
+        .btn-blue:active, .btn-blue.active-press { box-shadow: 0 2px 0 #3b82f6; }
+
+        .btn-white { background-color: #ffffff; box-shadow: 0 6px 0 #cbd5e1; color: #334155; border: 2px solid #e2e8f0; }
+        .btn-white:active, .btn-white.active-press { box-shadow: 0 2px 0 #cbd5e1; }
+        
+        /* Selected State for MCQ */
+        .mcq-selected {
+            background-color: #bfdbfe; /* blue-200 */
+            border-color: #3b82f6;
+            box-shadow: 0 4px 0 #3b82f6;
+            top: 2px;
+        }
+
+        /* Animations */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop-in {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* 추가된 뽑기 기계 흔들림 애니메이션 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) rotate(-3deg); }
+            20%, 40%, 60%, 80% { transform: translateX(5px) rotate(3deg); }
+        }
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Custom Input */
+        .cute-input {
+            border: 4px solid #cbd5e1;
+            border-radius: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.5rem;
+            outline: none;
+            transition: border-color 0.3s;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+        }
+        .cute-input:focus {
+            border-color: #60a5fa;
+        }
+
+        /* Math Styles */
+        .math-fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.2;
+        }
+        .math-fraction span {
+            display: block;
+        }
+        .math-fraction span.numerator {
+            border-bottom: 2px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="w-full bg-white/80 backdrop-blur-md shadow-sm p-4 sticky top-0 z-10 flex justify-between items-center">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+            <span class="text-3xl">🎒</span>
+            <h1 class="text-2xl text-blue-600 font-bold">6학년 수학 놀이터</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- 관리자 설정 버튼 수정 (설정 모달로 연결) -->
+            <button onclick="openSettingsModal()" class="text-2xl hover:scale-110 transition-transform drop-shadow-sm" title="설정">⚙️</button>
+            <!-- 추가된 다이아 표시기 -->
+            <div id="diamond-display" class="bg-blue-100 text-blue-700 px-4 py-1 rounded-full font-bold shadow-sm flex items-center gap-1 border-2 border-blue-300">
+                <span>💎</span> <span id="diamond-count">0</span>
+            </div>
+            <!-- 추가된 포인트 표시기 -->
+            <div id="point-display" class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full font-bold shadow-sm flex items-center gap-1 border-2 border-yellow-300">
+                <span>🪙</span> <span id="point-count">0</span> P
+            </div>
+            <div class="text-lg text-slate-500 hidden sm:block">2022 개정 교육과정</div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex flex-col items-center justify-start p-4 sm:p-8 relative" id="app-container">
+        
+        <!-- Screen 1: Home / Unit Selection -->
+        <div id="home-screen" class="w-full max-w-4xl flex flex-col items-center animate-pop-in">
+            <h2 class="text-3xl sm:text-4xl text-slate-700 mb-8 mt-4 text-center floating">어떤 단원을 공부할까요? 🤔</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full" id="unit-grid">
+                <!-- Units injected here by JS -->
+            </div>
+            <!-- 추가된 가챠방 이동 버튼 -->
+            <div class="mt-12 w-full flex justify-center">
+                 <button onclick="goGacha()" class="btn-3d btn-pink text-2xl px-8 py-4 rounded-2xl font-bold flex items-center gap-2 shadow-lg">
+                     🎰 자동차 뽑기방 가기 (50P)
+                 </button>
+            </div>
+            <!-- 다이아 상점 버튼 -->
+            <div class="mt-4 w-full flex justify-center gap-3 sm:gap-4 flex-wrap">
+                 <button onclick="openDiamondShop()" class="btn-3d btn-blue text-xl px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-md">
+                     💎 다이아 상점 (포인트 교환)
+                 </button>
+                 <button onclick="triggerManualSurpriseDeal()" class="btn-3d btn-white border-yellow-500 text-yellow-600 text-xl px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-md">
+                     ⚡ 깜짝 딜 상점 (희귀차)
+                 </button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Quiz Area -->
+        <div id="quiz-screen" class="w-full max-w-2xl hidden animate-pop-in flex flex-col">
+            <!-- Header/Progress -->
+            <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 mb-6">
+                <button onclick="goHome()" class="text-slate-400 hover:text-slate-600 text-xl transition-colors">◀ 뒤로</button>
+                <div class="text-xl font-bold text-slate-700" id="unit-title-display">단원 이름</div>
+                <div class="text-lg text-blue-500 font-bold bg-blue-50 px-3 py-1 rounded-full" id="progress-display">1 / 3</div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border-b-8 border-slate-200 flex flex-col items-center w-full">
+                <div id="question-text" class="text-2xl sm:text-3xl text-slate-800 text-center mb-8 leading-relaxed">
+                    <!-- Question goes here -->
+                </div>
+
+                <!-- Input Area (Options or Text Input) -->
+                <div id="input-area" class="w-full flex flex-col items-center gap-4 mb-8">
+                    <!-- Dynamic Inputs injected here -->
+                </div>
+
+                <!-- Action Button -->
+                <button id="submit-btn" onclick="checkAnswer()" class="btn-3d btn-yellow text-2xl px-10 py-4 rounded-2xl w-full sm:w-auto mt-4 font-bold">
+                    정답 확인! ✨
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Results -->
+        <div id="result-screen" class="w-full max-w-md hidden animate-pop-in flex flex-col items-center mt-10">
+            <div class="bg-white rounded-3xl p-10 shadow-lg border-b-8 border-slate-200 flex flex-col items-center w-full text-center">
+                <div id="result-emoji" class="text-7xl mb-4 floating">🎉</div>
+                <h2 class="text-4xl text-slate-800 mb-2">학습 완료!</h2>
+                <p class="text-2xl text-slate-500 mb-8" id="score-text">3문제 중 3문제를 맞췄어요!</p>
+                <button onclick="goHome()" class="btn-3d btn-green text-2xl px-8 py-4 rounded-2xl w-full font-bold">
+                    다른 단원 고르기 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Gacha & Garage (추가된 화면) -->
+        <div id="gacha-screen" class="w-full max-w-4xl hidden animate-pop-in flex flex-col items-center">
+            <!-- Header -->
+            <div class="w-full flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 mb-6">
+                <button onclick="goHome()" class="text-slate-400 hover:text-slate-600 text-xl transition-colors">◀ 홈으로</button>
+                <div class="text-2xl font-bold text-slate-700">자동차 뽑기방 🚗</div>
+                <div class="w-20"></div> <!-- 중앙 정렬을 위한 여백 -->
+            </div>
+
+            <!-- Gacha Machine -->
+            <div class="bg-white rounded-3xl p-8 shadow-lg border-b-8 border-slate-200 flex flex-col items-center w-full max-w-md mb-8 relative overflow-hidden">
+                <div id="gacha-machine" class="text-8xl mb-6 cursor-pointer drop-shadow-xl select-none" onclick="drawGacha(1)">🎰</div>
+                <div class="flex gap-4 w-full mb-4">
+                    <button onclick="drawGacha(1)" class="btn-3d btn-pink text-xl px-4 py-4 rounded-2xl w-1/2 font-bold">
+                        1회 뽑기 (50P)
+                    </button>
+                    <button onclick="drawGacha(3)" class="btn-3d btn-yellow text-xl px-4 py-4 rounded-2xl w-1/2 font-bold">
+                        3회 뽑기 (150P)
+                    </button>
+                </div>
+                <p class="text-lg text-slate-500 text-center">포인트를 모아 멋진 자동차를 뽑아보세요!</p>
+            </div>
+
+            <!-- 특별 자동차 팩 상점 (다이아 전용) -->
+            <div class="w-full bg-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl border-b-8 border-slate-900 mb-8">
+                <h3 class="text-2xl font-bold text-yellow-400 mb-6 flex items-center gap-2">💎 프리미엄 브랜드 팩 (다이아 전용)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- 람보르기니 팩 -->
+                    <div class="bg-slate-700/50 border border-slate-600 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-700 transition-colors">
+                        <div>
+                            <div class="text-lg font-bold text-white mb-1">😈 람보르기니 팩</div>
+                            <div class="text-xs text-slate-300">4종 확정 (전설~불멸)</div>
+                        </div>
+                        <button onclick="buyCarPack('lambo')" class="btn-3d btn-blue px-4 py-3 rounded-xl font-bold text-sm whitespace-nowrap">5,000 💎</button>
+                    </div>
+                    <!-- 포르쉐 팩 -->
+                    <div class="bg-slate-700/50 border border-slate-600 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-700 transition-colors">
+                        <div>
+                            <div class="text-lg font-bold text-white mb-1">🏎️ 포르쉐 팩</div>
+                            <div class="text-xs text-slate-300">4종 확정 (전설~뽑기불가)</div>
+                        </div>
+                        <button onclick="buyCarPack('porsche')" class="btn-3d btn-blue px-4 py-3 rounded-xl font-bold text-sm whitespace-nowrap">6,000 💎</button>
+                    </div>
+                    <!-- 부가티 팩 -->
+                    <div class="bg-slate-700/50 border border-slate-600 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-700 transition-colors">
+                        <div>
+                            <div class="text-lg font-bold text-white mb-1">🛸 부가티 팩</div>
+                            <div class="text-xs text-slate-300">4종 확정 (신화~뽑기불가)</div>
+                        </div>
+                        <button onclick="buyCarPack('bugatti')" class="btn-3d btn-blue px-4 py-3 rounded-xl font-bold text-sm whitespace-nowrap">8,000 💎</button>
+                    </div>
+                    <!-- K-프리미엄 팩 -->
+                    <div class="bg-slate-700/50 border border-slate-600 rounded-2xl p-4 flex justify-between items-center hover:bg-slate-700 transition-colors">
+                        <div>
+                            <div class="text-lg font-bold text-white mb-1">✨ K-프리미엄 팩</div>
+                            <div class="text-xs text-slate-300">국산 3종 (전설~개발자)</div>
+                        </div>
+                        <button onclick="buyCarPack('korea')" class="btn-3d btn-blue px-4 py-3 rounded-xl font-bold text-sm whitespace-nowrap">3,000 💎</button>
+                    </div>
+                    <!-- 하이퍼엔드 팩 -->
+                    <div class="bg-slate-700/50 border border-slate-600 rounded-2xl p-4 flex justify-between items-center sm:col-span-2 hover:bg-slate-700 transition-colors">
+                        <div>
+                            <div class="text-lg font-bold text-white mb-1">🌌 하이퍼엔드 드림 팩</div>
+                            <div class="text-xs text-slate-300">초희귀 하이퍼카 4종 (초월~뽑기불가)</div>
+                        </div>
+                        <button onclick="buyCarPack('hyper')" class="btn-3d btn-pink px-8 py-3 rounded-xl font-bold text-sm whitespace-nowrap">10,000 💎</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Garage -->
+            <div class="w-full bg-white rounded-3xl p-8 shadow-lg border-b-8 border-slate-200">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <h3 class="text-2xl font-bold text-slate-700 text-center">나의 차고 (보관함)</h3>
+                    <div class="flex gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-100 flex-wrap justify-center">
+                        <button onclick="mergeCars('일반', '레어', 2)" class="btn-3d btn-blue text-sm px-3 py-2 rounded-xl font-bold flex items-center gap-1">
+                            <span>🛠️ 일반 2 ➔ 레어</span>
+                        </button>
+                        <button onclick="mergeCars('레어', '전설', 3)" class="btn-3d btn-yellow text-sm px-3 py-2 rounded-xl font-bold flex items-center gap-1">
+                            <span>🌟 레어 3 ➔ 전설</span>
+                        </button>
+                        <button onclick="mergeCars('전설', '신화', 3)" class="btn-3d btn-pink text-sm px-3 py-2 rounded-xl font-bold flex items-center gap-1">
+                            <span>🔮 전설 3 ➔ 신화</span>
+                        </button>
+                        <button onclick="mergeCars('신화', '초월', 3)" class="btn-3d btn-white border-yellow-500 text-yellow-600 text-sm px-3 py-2 rounded-xl font-bold flex items-center gap-1">
+                            <span>🌌 신화 3 ➔ 초월</span>
+                        </button>
+                        <button onclick="mergeCars('초월', '불멸', 3)" class="btn-3d btn-white border-red-500 text-red-600 text-sm px-3 py-2 rounded-xl font-bold flex items-center gap-1">
+                            <span>🔥 초월 3 ➔ 불멸</span>
+                        </button>
+                        <button onclick="mergeCars('불멸', '개발자', 3)" class="btn-3d btn-white border-purple-800 text-purple-900 text-sm px-3 py-2 rounded-xl font-bold flex items-center gap-1">
+                            <span>💻 불멸 3 ➔ 개발자</span>
+                        </button>
+                        <button onclick="mergeCars('개발자', '뽑기불가', 3)" class="btn-3d btn-white border-black text-black text-sm px-3 py-2 rounded-xl font-bold flex items-center gap-1">
+                            <span>🚫 개발자 3 ➔ 뽑기불가</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="garage-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                    <!-- 뽑은 자동차들이 여기에 들어갑니다 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 5: Admin Screen (관리자 화면) -->
+        <div id="admin-screen" class="w-full max-w-4xl hidden animate-pop-in flex flex-col items-center">
+            <div class="w-full flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 mb-6">
+                <button onclick="goHome()" class="text-slate-400 hover:text-slate-600 text-xl transition-colors">◀ 홈으로</button>
+                <div class="text-2xl font-bold text-purple-700">🛠️ 관리자 설정</div>
+                <div class="w-20"></div>
+            </div>
+            <div class="w-full bg-white rounded-3xl p-8 shadow-lg border-b-8 border-slate-200 flex flex-col gap-6">
+                <!-- 포인트/다이아 설정 -->
+                <div class="flex flex-col gap-2">
+                    <label class="font-bold text-slate-700 text-lg">💰 재화 설정 (치트)</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="admin-point-input" class="cute-input flex-grow" placeholder="포인트 입력">
+                        <input type="number" id="admin-diamond-input" class="cute-input flex-grow" placeholder="다이아 입력">
+                        <button onclick="adminSetPoints()" class="btn-3d btn-green px-6 py-3 rounded-2xl font-bold">적용</button>
+                    </div>
+                </div>
+                <hr class="border-slate-200">
+                <!-- 자동차 추가 -->
+                <div class="flex flex-col gap-2">
+                    <label class="font-bold text-slate-700 text-lg">🚗 인벤토리 자동차 추가 (치트)</label>
+                    <div class="flex gap-2 flex-col sm:flex-row">
+                        <select id="admin-car-rarity" class="cute-input sm:w-1/3 text-lg" onchange="updateAdminCarList()">
+                            <option value="일반">일반</option>
+                            <option value="레어">레어</option>
+                            <option value="전설">전설</option>
+                            <option value="신화">신화</option>
+                            <option value="초월">초월</option>
+                            <option value="불멸">불멸</option>
+                            <option value="개발자">개발자</option>
+                            <option value="뽑기불가">뽑기불가</option>
+                        </select>
+                        <select id="admin-car-select" class="cute-input sm:w-1/3 text-lg">
+                            <!-- 차 목록 동적 생성 -->
+                        </select>
+                        <button onclick="adminAddCar()" class="btn-3d btn-pink px-6 py-3 rounded-2xl font-bold sm:w-1/3">추가하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Settings Menu (Decoy 1) -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="settings-box">
+            <div class="w-full flex justify-end mb-2"><button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold">✕</button></div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">⚙️ 환경 설정</h3>
+            <div class="w-full flex flex-col gap-3">
+                <button onclick="openSoundSettings()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🔊 소리 설정</button>
+                <button onclick="openScreenSettings()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🖥️ 화면 설정</button>
+                <button onclick="showStats()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-blue-600">📊 학습 통계</button>
+                <button onclick="showRank()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-orange-600">🏅 내 등급 보기</button>
+                <button onclick="showHoF()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🏆 명예의 전당</button>
+                <button onclick="openPointMenu()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🪙 포인트</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🔗 계정 연동</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Point Menu (Decoy 2) -->
+    <div id="point-menu-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="point-menu-box">
+            <div class="w-full flex justify-between mb-2">
+                <button onclick="openSettingsModal(true)" class="text-slate-400 hover:text-slate-700 text-xl font-bold">◀ 뒤로</button>
+                <button onclick="closePointMenu()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold">✕</button>
+            </div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">🪙 포인트 메뉴</h3>
+            <div class="w-full flex flex-col gap-3">
+                <button onclick="doAttendance()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-blue-600">📅 매일 출석체크</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-pink-500">🎁 친구 선물하기</button>
+                <button onclick="toggleSavings()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-green-600" id="savings-btn">🏦 포인트 적금 가입</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">💎 포인트 충전(준비중)</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">📜 포인트 내역</button>
+                <button onclick="openPointSettings()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">⚙️ 포인트 설정</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Point Settings Menu (Decoy 3) -->
+    <div id="point-settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="point-settings-box">
+            <div class="w-full flex justify-between mb-2">
+                <button onclick="openPointMenu(true)" class="text-slate-400 hover:text-slate-700 text-xl font-bold">◀ 뒤로</button>
+                <button onclick="closePointSettings()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold">✕</button>
+            </div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">⚙️ 포인트 설정</h3>
+            <div class="w-full flex flex-col gap-3">
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-purple-600">💾 데이터 백업</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🔔 효과음 설정</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🎨 UI 색상 변경</button>
+                <button onclick="openCouponModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🎟️ 쿠폰 등록</button>
+                <button onclick="openMyPointMenu()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">💳 MY포인트</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY포인트 Menu (Decoy 4) -->
+    <div id="my-point-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="my-point-box">
+            <div class="w-full flex justify-between mb-2">
+                <button onclick="openPointSettings(true)" class="text-slate-400 hover:text-slate-700 text-xl font-bold">◀ 뒤로</button>
+                <button onclick="closeMyPointMenu()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold">✕</button>
+            </div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">💳 MY포인트</h3>
+            <div class="w-full flex flex-col gap-3">
+                <button onclick="showReadyModal()" class="btn-3d btn-yellow py-3 rounded-2xl font-bold text-lg">🎡 행운의 룰렛</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-pink-500">🎨 프로필 꾸미기</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🔄 포인트 전환</button>
+                <button onclick="openMyPointSettings()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">⚙️ 설정</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">💸 결제하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY포인트 설정 Menu -->
+    <div id="my-point-settings-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="my-point-settings-box">
+            <div class="w-full flex justify-between mb-2">
+                <button onclick="openMyPointMenu(true)" class="text-slate-400 hover:text-slate-700 text-xl font-bold">◀ 뒤로</button>
+                <button onclick="closeMyPointSettings()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold">✕</button>
+            </div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">⚙️ MY포인트 설정</h3>
+            <div class="w-full flex flex-col gap-3">
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🌐 언어 변경</button>
+                <button onclick="showReadyModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg">🎧 고객센터</button>
+                <button onclick="openAdminPwdModal()" class="btn-3d btn-white py-3 rounded-2xl font-bold text-lg text-slate-300">개발자관리</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Password Modal -->
+    <div id="admin-pwd-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[60] p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="admin-pwd-box">
+            <div class="w-full flex justify-between mb-2">
+                <button onclick="closeAdminPwdModal()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">◀ 취소</button>
+            </div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">🔒 관리자 인증</h3>
+            <input type="password" id="admin-pwd-input" class="cute-input mb-4" placeholder="">
+            <button onclick="checkAdminPwd()" class="btn-3d btn-pink py-3 px-8 w-full rounded-2xl font-bold text-lg">확인</button>
+        </div>
+    </div>
+
+    <!-- Diamond Shop Modal -->
+    <div id="diamond-shop-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[60] p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="diamond-shop-box">
+            <div class="w-full flex justify-end mb-2"><button onclick="closeDiamondShop()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold">✕</button></div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">💎 다이아 상점</h3>
+            <p class="text-slate-500 mb-6">포인트를 다이아로 교환하세요!</p>
+            <div class="w-full flex flex-col gap-3">
+                <button onclick="buyDiamonds(1)" class="btn-3d btn-blue py-3 rounded-2xl font-bold text-lg">💎 1개 (100P)</button>
+                <button onclick="buyDiamonds(5)" class="btn-3d btn-blue py-3 rounded-2xl font-bold text-lg">💎 5개 (500P)</button>
+                <button onclick="buyDiamonds(10)" class="btn-3d btn-blue py-3 rounded-2xl font-bold text-lg">💎 10개 (1,000P)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coupon Modal -->
+    <div id="coupon-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[60] p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="coupon-box">
+            <div class="w-full flex justify-end mb-2"><button onclick="closeCouponModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold">✕</button></div>
+            <h3 class="text-2xl font-bold mb-6 text-slate-800">🎟️ 쿠폰 등록</h3>
+            <input type="text" id="coupon-input" class="cute-input mb-4" placeholder="코드 입력 (예: MATH2026)">
+            <button onclick="submitCoupon()" class="btn-3d btn-pink py-3 px-8 w-full rounded-2xl font-bold text-lg">등록하기</button>
+        </div>
+    </div>
+
+    <!-- Surprise Deal Modal -->
+    <div id="surprise-deal-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden items-center justify-center z-[70] p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-gradient-to-br from-yellow-200 to-red-300 rounded-3xl p-1 shadow-2xl max-w-md w-full transform scale-90 transition-transform duration-300" id="surprise-deal-box">
+            <div class="bg-white rounded-[1.4rem] p-8 flex flex-col items-center text-center">
+                <h3 class="text-3xl font-bold mb-2 text-red-600 animate-pulse">깜짝 딜! ⚡</h3>
+                <p class="text-slate-600 mb-4 font-bold">초희귀 자동차를 획득할 기회!</p>
+                <div id="surprise-car-display" class="flex flex-col items-center justify-center py-6 px-4 rounded-2xl border-4 shadow-md w-full mb-6">
+                    <!-- Car details injected here -->
+                </div>
+                <div class="flex gap-2 w-full">
+                    <button onclick="declineSurpriseDeal()" class="btn-3d btn-white w-1/2 py-3 rounded-2xl font-bold text-sm">포기하기</button>
+                    <button id="surprise-buy-btn" class="btn-3d btn-yellow w-1/2 py-3 rounded-2xl font-bold text-sm">구매하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Alerts/Feedback -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[70] p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="modal-content-box">
+            <div id="modal-icon" class="text-6xl mb-4">⭕</div>
+            <h3 id="modal-title" class="text-3xl font-bold mb-2 text-slate-800">정답입니다!</h3>
+            <div id="modal-desc" class="text-lg text-slate-500 mb-8 w-full">아주 잘했어요!</div>
+            <button id="modal-btn" class="btn-3d btn-blue text-xl px-8 py-3 rounded-2xl w-full font-bold">
+                다음 문제 ➔
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirm Modal (판매 및 경고용) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-[80] p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl border-b-8 border-slate-200 max-w-sm w-full transform scale-90 transition-transform duration-300 flex flex-col items-center text-center" id="confirm-box">
+            <h3 id="confirm-title" class="text-2xl font-bold mb-4 text-slate-800">확인</h3>
+            <p id="confirm-desc" class="text-slate-600 mb-6">정말 진행하시겠습니까?</p>
+            <div class="flex gap-2 w-full">
+                <button onclick="closeConfirmModal()" class="btn-3d btn-white w-1/2 py-3 rounded-2xl font-bold">취소</button>
+                <button id="confirm-btn" class="btn-3d btn-pink w-1/2 py-3 rounded-2xl font-bold">확인</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Application Logic (전체 데이터 및 생성 로직 전면 개편) -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    
+    // 환경에 따라 달라질 수 있는 JSON 파싱 에러(Unexpected token '}') 방지
+    let firebaseConfig = null;
+    try {
+        if (typeof __firebase_config !== 'undefined') {
+            firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
+        }
+    } catch (e) {
+        console.warn("Firebase config is not valid JSON, running in local mode.");
+    }
+    
+    let db, auth, userId;
+
+    if (firebaseConfig && Object.keys(firebaseConfig).length > 0) {
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser?.uid;
+                if (userId) {
+                    subscribeToData();
+                }
+            } catch (error) {
+                console.error("Firebase auth error:", error);
+            }
+        };
+        initAuth();
+    }
+
+    function subscribeToData() {
+        const docRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'main');
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (window.updateStateFromCloud) {
+                    window.updateStateFromCloud(data);
+                }
+            }
+        }, (error) => {
+            console.error("Firestore onSnapshot error:", error);
+        });
+    }
+
+    window.saveDataToCloud = function(data) {
+        if (!db || !userId) return;
+        const docRef = doc(db, 'artifacts', appId, 'users', userId, 'userData', 'main');
+        setDoc(docRef, data, { merge: true }).catch(err => console.error("Save error:", err));
+    };
+</script>
+<script>
+    // --- Curriculum Data ---
+    const frac = (n, d) => `<div class="math-fraction"><span class="numerator">${n}</span><span>${d}</span></div>`;
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    const curriculum = [
+        { id: 1, title: '1. 분수의 나눗셈', icon: '🍕', color: 'btn-pink' },
+        { id: 2, title: '2. 각기둥과 각뿔', icon: '⛺', color: 'btn-green' },
+        { id: 3, title: '3. 소수의 나눗셈', icon: '💧', color: 'btn-blue' },
+        { id: 4, title: '4. 비와 비율', icon: '⚖️', color: 'btn-yellow' },
+        { id: 5, title: '5. 여러 가지 그래프', icon: '📊', color: 'btn-pink' },
+        { id: 6, title: '6. 직육면체의 부피와 겉넓이', icon: '📦', color: 'btn-blue' }
+    ];
+
+    // --- Question Generators (Infinite Variations 동적 생성기) ---
+    function generateQuestion(unitId) {
+        const types = ['mcq', 'short'];
+        let q = '', ans = '', options = [];
+        let qType = types[rand(0, 1)]; // 50% 객관식, 50% 주관식
+
+        if (unitId === 1) { // 1. 분수의 나눗셈
+            const b = rand(3, 9);
+            const c = rand(1, 4);
+            const a = c * rand(2, 5); 
+            q = `${frac(a, b)} &divide; ${frac(c, b)} 의 계산 결과는?`;
+            ans = (a / c).toString();
+            options = [(a/c).toString(), (a/c + 1).toString(), (a/c + 2).toString(), (Math.max(1, a/c - 1)).toString()];
+        } 
+        else if (unitId === 2) { // 2. 각기둥과 각뿔
+            const shapes = ['삼각', '사각', '오각', '육각', '칠각', '팔각'];
+            const nValues = [3, 4, 5, 6, 7, 8];
+            const sIdx = rand(0, shapes.length - 1);
+            const sName = shapes[sIdx];
+            const n = nValues[sIdx];
+            const isPrism = rand(0, 1) === 0;
+            
+            const qKind = rand(0, 2);
+            if (isPrism) {
+                if (qKind === 0) { q = `${sName}기둥의 면은 모두 몇 개인가요?`; ans = (n + 2).toString(); }
+                else if (qKind === 1) { q = `${sName}기둥의 모서리는 모두 몇 개인가요?`; ans = (n * 3).toString(); }
+                else { q = `${sName}기둥의 꼭짓점은 모두 몇 개인가요?`; ans = (n * 2).toString(); }
+            } else {
+                if (qKind === 0) { q = `${sName}뿔의 면은 모두 몇 개인가요?`; ans = (n + 1).toString(); }
+                else if (qKind === 1) { q = `${sName}뿔의 모서리는 모두 몇 개인가요?`; ans = (n * 2).toString(); }
+                else { q = `${sName}뿔의 꼭짓점은 모두 몇 개인가요?`; ans = (n + 1).toString(); }
+            }
+            options = [ans, (parseInt(ans)+1).toString(), (parseInt(ans)-1).toString(), (parseInt(ans)+2).toString()];
+        }
+        else if (unitId === 3) { // 3. 소수의 나눗셈
+            const a = rand(2, 9);
+            const divisor = rand(2, 9);
+            const divident = a * divisor;
+            q = `${(divident / 10).toFixed(1)} &divide; ${(divisor / 10).toFixed(1)} 의 계산 결과는?`;
+            ans = a.toString();
+            options = [ans, (a+1).toString(), (a+2).toString(), (Math.max(1, a-1)).toString()];
+        }
+        else if (unitId === 4) { // 4. 비와 비율
+            const qKind = rand(0, 2);
+            if (qKind === 0) {
+                const a = rand(2, 9); const b = rand(2, 9);
+                q = `비 ${a} : ${b} 에서 기준량은 얼마인가요?`;
+                ans = b.toString();
+                options = [a.toString(), b.toString(), (a+b).toString(), (a*b).toString()];
+            } else if (qKind === 1) {
+                const b = [2, 4, 5, 10, 20, 25, 50][rand(0, 6)];
+                const a = rand(1, b - 1);
+                q = `비율 ${frac(a, b)} 을 백분율(%)로 나타내면 얼마인가요?`;
+                ans = (a / b * 100).toString();
+                options = [ans, (parseInt(ans)+10).toString(), (parseInt(ans)-10).toString(), (parseInt(ans)*2).toString()];
+            } else {
+                const a = rand(2, 5); const b = rand(2, 5); const mul = rand(2, 4);
+                q = `비례식 ${a} : ${b} = ${a*mul} : x 에서 x는 얼마인가요?`;
+                ans = (b * mul).toString();
+                options = [ans, (b*mul+1).toString(), (b*mul-1).toString(), (a*mul).toString()];
+            }
+        }
+        else if (unitId === 5) { // 5. 여러 가지 그래프
+            const total = [100, 200, 500][rand(0, 2)];
+            const percent = [10, 20, 25, 30, 40, 50][rand(0, 5)];
+            const part = (total * percent) / 100;
+            q = `전체 학생 ${total}명 중 게임을 좋아하는 학생이 ${part}명입니다. 띠그래프에 나타낼 때 백분율은 몇 %인가요?`;
+            ans = percent.toString();
+            options = [ans, (percent+10).toString(), (percent-10 > 0 ? percent-10 : percent+5).toString(), (percent+20).toString()];
+        }
+        else if (unitId === 6) { // 6. 직육면체의 부피와 겉넓이
+            const qKind = rand(0, 1);
+            if (qKind === 0) {
+                const w = rand(2, 5); const d = rand(2, 5); const h = rand(2, 5);
+                q = `가로 ${w}cm, 세로 ${d}cm, 높이 ${h}cm인 직육면체의 부피는 몇 cm&sup3; 인가요?`;
+                ans = (w * d * h).toString();
+                options = [ans, (w*d*h + 2).toString(), (w*d*h - 2 > 0 ? w*d*h - 2 : 10).toString(), (w*d*h + 5).toString()];
+            } else {
+                const a = rand(2, 5);
+                q = `한 모서리가 ${a}cm인 정육면체의 겉넓이는 몇 cm&sup2; 인가요?`;
+                ans = (a * a * 6).toString();
+                options = [ans, (a*a*4).toString(), (a*a*6 + 10).toString(), (a*a*8).toString()];
+            }
+        }
+
+        // 보기 중복 제거 및 4개 생성 후 무작위 셔플
+        options = [...new Set(options)];
+        while(options.length < 4) {
+            let fallback = (parseInt(ans) + rand(1, 10)).toString();
+            if(!options.includes(fallback)) options.push(fallback);
+        }
+        options = options.sort(() => Math.random() - 0.5);
+
+        if (qType === 'short') q += " <br><span class='text-sm text-slate-400'>(숫자만 입력)</span>";
+
+        return { type: qType, q, options, ans };
+    }
+
+    // --- State Variables ---
+    let currentUnitId = null;
+    let currentQuestions = [];
+    let currentQIndex = 0;
+    let score = 0;
+    let selectedOption = null;
+    
+    let points = 0;
+    let myCars = [];
+    let attendanceDate = null;
+    let currentThemeBg = '#f0f9ff';
+    let currentThemeDot = '#bae6fd';
+    let currentNickname = '수학천재';
+    const QUESTIONS_PER_ROUND = 60; // 60문제 세팅
+    
+    // 추가된 재화 데이터
+    let diamonds = 0;
+    let usedCoupons = [];
+    
+    // 추가된 통계 및 설정 데이터
+    let totalSolved = 0;
+    let correctAnswers = 0;
+    let bgmEnabled = true;
+    let sfxEnabled = true;
+    let savingsActive = false;
+    let savingsInterval = null;
+
+    window.updateStateFromCloud = function(data) {
+        if (data.points !== undefined) points = data.points;
+        if (data.diamonds !== undefined) diamonds = data.diamonds;
+        if (data.usedCoupons !== undefined) usedCoupons = data.usedCoupons;
+        if (data.myCars !== undefined) myCars = data.myCars;
+        if (data.attendanceDate !== undefined) attendanceDate = data.attendanceDate;
+        
+        if (data.totalSolved !== undefined) totalSolved = data.totalSolved;
+        if (data.correctAnswers !== undefined) correctAnswers = data.correctAnswers;
+        if (data.bgmEnabled !== undefined) bgmEnabled = data.bgmEnabled;
+        if (data.sfxEnabled !== undefined) sfxEnabled = data.sfxEnabled;
+        
+        if (data.themeBg !== undefined && data.themeDot !== undefined) {
+            currentThemeBg = data.themeBg;
+            currentThemeDot = data.themeDot;
+            document.body.style.backgroundColor = currentThemeBg;
+            document.body.style.backgroundImage = `radial-gradient(${currentThemeDot} 2px, transparent 2px)`;
+        }
+
+        updatePointsUI();
+        if (document.getElementById('gacha-screen') && !document.getElementById('gacha-screen').classList.contains('hidden')) {
+            renderGarage();
+        }
+    };
+
+    function triggerSave() {
+        if (window.saveDataToCloud) {
+            window.saveDataToCloud({
+                points: points,
+                diamonds: diamonds,
+                usedCoupons: usedCoupons,
+                myCars: myCars,
+                attendanceDate: attendanceDate,
+                themeBg: currentThemeBg,
+                themeDot: currentThemeDot,
+                nickname: currentNickname,
+                totalSolved: totalSolved,
+                correctAnswers: correctAnswers,
+                bgmEnabled: bgmEnabled,
+                sfxEnabled: sfxEnabled
+            });
+        }
+    }
+
+    // --- DOM Elements ---
+    const homeScreen = document.getElementById('home-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const adminScreen = document.getElementById('admin-screen');
+    const unitGrid = document.getElementById('unit-grid');
+    const questionText = document.getElementById('question-text');
+    const inputArea = document.getElementById('input-area');
+    const unitTitleDisplay = document.getElementById('unit-title-display');
+    const progressDisplay = document.getElementById('progress-display');
+    const adminPwdModal = document.getElementById('admin-pwd-modal');
+    const adminPwdInput = document.getElementById('admin-pwd-input');
+    
+    // Modal Elements
+    const modal = document.getElementById('custom-modal');
+    const modalBox = document.getElementById('modal-content-box');
+    const modalIcon = document.getElementById('modal-icon');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalBtn = document.getElementById('modal-btn');
+    let modalCallback = null;
+
+    // --- Initialization ---
+    function init() {
+        renderHome();
+    }
+
+    function renderHome() {
+        homeScreen.classList.remove('hidden');
+        quizScreen.classList.add('hidden');
+        resultScreen.classList.add('hidden');
+        adminScreen.classList.add('hidden');
+        
+        unitGrid.innerHTML = '';
+        curriculum.forEach(unit => {
+            const card = document.createElement('button');
+            card.className = `btn-3d ${unit.color} p-6 rounded-3xl flex flex-col items-center justify-center gap-4 text-center cursor-pointer min-h-[160px]`;
+            card.onclick = () => startQuiz(unit.id);
+            card.innerHTML = `
+                <span class="text-5xl">${unit.icon}</span>
+                <span class="text-2xl font-bold">${unit.title}</span>
+            `;
+            unitGrid.appendChild(card);
+        });
+    }
+
+    // --- Quiz Flow ---
+    function startQuiz(unitId) {
+        currentUnitId = unitId;
+        
+        // 단원 진입 시 60문제를 즉석에서 무작위로 생성
+        currentQuestions = [];
+        for(let i=0; i<QUESTIONS_PER_ROUND; i++) {
+            currentQuestions.push(generateQuestion(unitId));
+        }
+
+        currentQIndex = 0;
+        score = 0;
+
+        const unitInfo = curriculum.find(u => u.id === unitId);
+        unitTitleDisplay.textContent = unitInfo.title;
+
+        homeScreen.classList.add('hidden');
+        quizScreen.classList.remove('hidden');
+        
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        selectedOption = null;
+        const q = currentQuestions[currentQIndex];
+        
+        progressDisplay.textContent = `${currentQIndex + 1} / ${currentQuestions.length}`;
+        questionText.innerHTML = q.q;
+        inputArea.innerHTML = '';
+
+        if (q.type === 'mcq') {
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-3d btn-white text-xl py-3 px-6 rounded-2xl w-full text-center mb-2';
+                btn.textContent = opt;
+                btn.onclick = (e) => selectOption(opt, e.currentTarget);
+                inputArea.appendChild(btn);
+            });
+        } else if (q.type === 'short') {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'cute-input';
+            input.placeholder = '정답 입력';
+            input.id = 'short-answer-input';
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') checkAnswer();
+            });
+            inputArea.appendChild(input);
+            setTimeout(() => input.focus(), 100);
+        }
+    }
+
+    function selectOption(opt, btnElement) {
+        selectedOption = opt;
+        Array.from(inputArea.children).forEach(child => {
+            child.classList.remove('mcq-selected');
+            child.classList.add('btn-white');
+        });
+        btnElement.classList.remove('btn-white');
+        btnElement.classList.add('mcq-selected');
+    }
+
+    function checkAnswer() {
+        const q = currentQuestions[currentQIndex];
+        let isCorrect = false;
+        let userAnswer = '';
+
+        if (q.type === 'mcq') {
+            if (!selectedOption) {
+                showModal('앗!', '보기를 먼저 선택해주세요.', 'error');
+                return;
+            }
+            userAnswer = selectedOption;
+            isCorrect = (userAnswer === q.ans);
+        } else {
+            const inputEl = document.getElementById('short-answer-input');
+            userAnswer = inputEl.value.trim().replace(/\s+/g, '');
+            if (!userAnswer) {
+                showModal('앗!', '정답을 입력해주세요.', 'error');
+                return;
+            }
+            const correctAns = q.ans.replace(/\s+/g, '');
+            isCorrect = (userAnswer === correctAns);
+        }
+
+        totalSolved++; // 풀이 횟수 증가
+        if (isCorrect) {
+            score++;
+            points += 10;
+            correctAnswers++; // 정답 횟수 증가
+            triggerSave();
+            updatePointsUI();
+            showModal('정답입니다!', '참 잘했어요! 🌟 <br><span class="text-yellow-600 font-bold">+10 포인트 획득!</span>', 'success', () => checkSurpriseDeal(nextQuestion), '다음 문제 ➔');
+        } else {
+            triggerSave();
+            showModal('아쉬워요!', `정답은 '${q.ans}' 입니다. 조금만 더 힘내요! 💪`, 'error', nextQuestion, '다음 문제 ➔');
+        }
+    }
+
+    function nextQuestion() {
+        currentQIndex++;
+        if (currentQIndex < currentQuestions.length) {
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizScreen.classList.add('hidden');
+        resultScreen.classList.remove('hidden');
+
+        const scoreText = document.getElementById('score-text');
+        const resultEmoji = document.getElementById('result-emoji');
+        
+        scoreText.textContent = `총 ${currentQuestions.length}문제 중 ${score}문제를 맞췄어요!`;
+        
+        if (score === currentQuestions.length) {
+            resultEmoji.textContent = '🏆';
+            scoreText.innerHTML += '<br><span class="text-blue-500 font-bold mt-2 inline-block">완벽해요! 수학 천재!</span>';
+        } else if (score >= currentQuestions.length / 2) {
+            resultEmoji.textContent = '👏';
+            scoreText.innerHTML += '<br><span class="text-green-500 font-bold mt-2 inline-block">정말 잘했어요!</span>';
+        } else {
+            resultEmoji.textContent = '💪';
+            scoreText.innerHTML += '<br><span class="text-orange-500 font-bold mt-2 inline-block">다음엔 더 잘할 수 있어요!</span>';
+        }
+    }
+
+    function goHome() {
+        if (homeScreen) homeScreen.classList.remove('hidden');
+        if (quizScreen) quizScreen.classList.add('hidden');
+        if (resultScreen) resultScreen.classList.add('hidden');
+        if (adminScreen) adminScreen.classList.add('hidden');
+        
+        const gachaScreen = document.getElementById('gacha-screen');
+        if (gachaScreen) gachaScreen.classList.add('hidden');
+        
+        // 홈 이동시 설정창 강제 초기화
+        const modalsToHide = [
+            'settings-modal',
+            'point-menu-modal',
+            'point-settings-modal',
+            'my-point-modal',
+            'my-point-settings-modal',
+            'admin-pwd-modal',
+            'diamond-shop-modal',
+            'coupon-modal',
+            'surprise-deal-modal'
+        ];
+        
+        modalsToHide.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
+    }
+
+    // --- Gacha & Garage System ---
+    const rarities = [
+        { name: '일반', chance: 65, color: 'bg-slate-100 border-slate-200' },
+        { name: '레어', chance: 30, color: 'bg-blue-100 border-blue-300' },
+        { name: '전설', chance: 4.5,  color: 'bg-yellow-200 border-yellow-400 text-yellow-900 shadow-yellow-400/50 shadow-lg' },
+        { name: '신화', chance: 0.4, color: 'bg-purple-200 border-purple-400 text-purple-900 shadow-purple-500/50 shadow-lg' },
+        { name: '초월', chance: 0.08, color: 'bg-slate-800 border-yellow-500 text-yellow-300 shadow-yellow-500/80 shadow-xl' },
+        { name: '불멸', chance: 0.02, color: 'bg-red-950 border-red-500 text-red-400 shadow-red-500/100 shadow-2xl' },
+        { name: '개발자', chance: 0, color: 'bg-slate-900 border-green-500 text-green-400 shadow-green-500/100 shadow-2xl font-mono' },
+        { name: '뽑기불가', chance: 0, color: 'bg-black border-slate-700 text-white shadow-white/50 shadow-2xl tracking-widest' }
+    ];
+
+    // 실제 자동차 이름 설정 적용 (신화, 초월 등급 추가)
+    const carPool = {
+        '일반': [
+            { emoji: '🚗', name: '현대 아반떼' },
+            { emoji: '🚕', name: '기아 K5' },
+            { emoji: '🚗', name: '현대 쏘나타' },
+            { emoji: '🚙', name: '르노 아르카나' },
+            { emoji: '🚗', name: 'KG 토레스' }
+        ],
+        '레어': [
+            { emoji: '🚙', name: '현대 그랜저' },
+            { emoji: '🚗', name: '제네시스 G70' },
+            { emoji: '🏎️', name: 'BMW 3시리즈' },
+            { emoji: '🚗', name: '벤츠 C클래스' },
+            { emoji: '🚙', name: '기아 쏘렌토' }
+        ],
+        '전설': [
+            { emoji: '🏎️', name: '제네시스 G90' },
+            { emoji: '🚗', name: '벤츠 S클래스' },
+            { emoji: '🚙', name: 'BMW X7' },
+            { emoji: '🚗', name: '포르쉐 파나메라' },
+            { emoji: '🏎️', name: '아우디 A8' }
+        ],
+        '신화': [
+            { emoji: '🏎️', name: '포르쉐 911 GT3' },
+            { emoji: '🚗', name: '람보르기니 아벤타도르' },
+            { emoji: '🚙', name: '페라리 SF90' },
+            { emoji: '🚗', name: '맥라렌 720S' },
+            { emoji: '🏎️', name: '롤스로이스 팬텀' }
+        ],
+        '초월': [
+            { emoji: '🏎️', name: '부가티 시론' },
+            { emoji: '🚀', name: '코닉세그 제스코' },
+            { emoji: '🛸', name: '파가니 와이라' },
+            { emoji: '🏎️', name: '리막 네베라' },
+            { emoji: '💎', name: '애스턴마틴 발키리' }
+        ],
+        '불멸': [
+            { emoji: '🔥', name: '부가티 볼리드' },
+            { emoji: '⚡', name: 'SSC 투아타라' },
+            { emoji: '🌪️', name: '헤네시 베놈 F5' },
+            { emoji: '😈', name: '람보르기니 베네노' },
+            { emoji: '🦇', name: '파가니 존다 R' }
+        ],
+        '개발자': [
+            { emoji: '💠', name: '현대 N Vision 74' },
+            { emoji: '✨', name: '제네시스 X 컨버터블' },
+            { emoji: '🌌', name: '르노 트레조' },
+            { emoji: '🧊', name: 'BMW 비전 노이어 클라쎄' },
+            { emoji: '⚡', name: '포르쉐 미션 R' }
+        ],
+        '뽑기불가': [
+            { emoji: '🧬', name: '벤츠 비전 AVTR' },
+            { emoji: '🔭', name: '아우디 스카이스피어' },
+            { emoji: '🚀', name: '포르쉐 미션 X' },
+            { emoji: '⚡', name: '람보르기니 테르조 밀레니오' },
+            { emoji: '🏎️', name: '부가티 비전 그란투리스모' }
+        ]
+    };
+
+    function updatePointsUI() {
+        document.getElementById('point-count').textContent = points;
+        const dDisplay = document.getElementById('diamond-count');
+        if (dDisplay) dDisplay.textContent = diamonds;
+    }
+
+    function goGacha() {
+        homeScreen.classList.add('hidden');
+        quizScreen.classList.add('hidden');
+        resultScreen.classList.add('hidden');
+        adminScreen.classList.add('hidden');
+        document.getElementById('gacha-screen').classList.remove('hidden');
+        renderGarage();
+    }
+
+    function drawGacha(times = 1) {
+        const cost = 50 * times;
+        if (points < cost) {
+            showModal('앗!', '포인트가 부족해요.<br>문제를 풀고 포인트를 모아오세요!', 'error');
+            return;
+        }
+        
+        points -= cost;
+        triggerSave();
+        updatePointsUI();
+        
+        const machine = document.getElementById('gacha-machine');
+        machine.classList.add('animate-shake');
+        
+        setTimeout(() => {
+            machine.classList.remove('animate-shake');
+            
+            let resultHTML = '';
+            
+            for(let t = 0; t < times; t++) {
+                let r = Math.random() * 100;
+                let sum = 0;
+                let selectedRarity = rarities[0];
+                let rIdx = 0;
+                
+                for(let i = 0; i < rarities.length; i++) {
+                    sum += rarities[i].chance;
+                    if(r <= sum) {
+                        selectedRarity = rarities[i];
+                        rIdx = i;
+                        break;
+                    }
+                }
+
+                const models = carPool[selectedRarity.name];
+                const selectedModel = models[Math.floor(Math.random() * models.length)];
+                
+                const myNewCar = {
+                    emoji: selectedModel.emoji,
+                    name: selectedModel.name,
+                    rarity: selectedRarity.name,
+                    color: selectedRarity.color
+                };
+
+                myCars.push(myNewCar);
+                
+                const isLegendaryOrHigher = rIdx >= 2;
+                let extraText = '';
+                if (selectedRarity.name === '전설') extraText = '<br><span class="text-[10px] text-red-500 font-bold">초대박! 전설!</span>';
+                else if (selectedRarity.name === '신화') extraText = '<br><span class="text-[10px] text-purple-500 font-bold">기적! 신화!</span>';
+                else if (selectedRarity.name === '초월') extraText = '<br><span class="text-[10px] text-yellow-500 font-bold">세계최고! 초월!</span>';
+                else if (selectedRarity.name === '불멸') extraText = '<br><span class="text-[10px] text-red-600 font-bold animate-pulse">절대존엄! 불멸!</span>';
+
+                resultHTML += `
+                    <div class="flex flex-col items-center bg-slate-50 p-3 rounded-xl border border-slate-200 ${times === 1 ? 'w-full' : 'flex-1 min-w-[30%]'}">
+                        <span class="${times === 1 ? 'text-6xl' : 'text-4xl'} mb-1 ${isLegendaryOrHigher ? 'animate-bounce' : ''}">${myNewCar.emoji}</span>
+                        <span class="font-bold text-slate-700 ${times === 1 ? 'text-2xl' : 'text-[11px]'} break-keep text-center leading-tight min-h-[2.5rem] flex items-center justify-center">${myNewCar.name}</span>
+                        <span class="text-[10px] font-bold bg-white px-2 py-0.5 rounded-full inline-block mt-1 shadow-sm ${isLegendaryOrHigher ? 'text-yellow-600 border border-yellow-400' : 'text-slate-500'}">
+                            ${myNewCar.rarity}
+                        </span>
+                        ${extraText}
+                    </div>
+                `;
+            }
+            
+            triggerSave();
+            renderGarage();
+            
+            const finalHTML = `
+                <div class="text-lg mb-2 font-bold text-slate-600">${times}대 뽑기 완료!</div>
+                <div class="flex justify-center gap-2 w-full flex-wrap">${resultHTML}</div>
+            `;
+            
+            showModal('뽑기 성공! 🎉', finalHTML, 'success');
+        }, 600);
+    }
+
+    function renderGarage() {
+        const grid = document.getElementById('garage-grid');
+        if (myCars.length === 0) {
+            grid.innerHTML = '<div class="text-center text-slate-400 py-10 col-span-full">아직 뽑은 자동차가 없어요.<br>문제를 풀고 자동차를 모아보세요!</div>';
+            return;
+        }
+        
+        grid.innerHTML = '';
+        [...myCars].reverse().forEach((car, index) => {
+            const realIndex = myCars.length - 1 - index; // 거꾸로 렌더링되므로 실제 배열 인덱스 역계산
+            const el = document.createElement('div');
+            el.className = `flex flex-col items-center justify-center py-6 px-2 rounded-2xl ${car.color} border-4 shadow-md animate-pop-in relative group`;
+            el.style.animationFillMode = 'both';
+            el.style.animationDelay = `${(index % 10) * 0.05}s`;
+            el.innerHTML = `
+                <div class="text-5xl mb-3 floating" style="animation-delay: ${Math.random()}s">${car.emoji}</div>
+                <div class="text-[14px] font-bold text-slate-700 text-center break-keep">${car.name}</div>
+                <div class="text-[11px] text-slate-500 bg-white/70 px-2 py-1 rounded-full mt-2 mb-2">${car.rarity}</div>
+                <button onclick="promptSellCar(${realIndex})" class="w-full bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs py-1.5 rounded-lg transition-colors border border-red-200 shadow-sm hidden group-hover:block absolute bottom-2 left-0 right-0 mx-2" style="width: calc(100% - 1rem);">판매하기</button>
+            `;
+            grid.appendChild(el);
+        });
+    }
+
+    // --- 추가된 자동차 판매 시스템 ---
+    const sellPrices = { '일반': 10, '레어': 50, '전설': 200, '신화': 1000, '초월': 5000, '불멸': 20000, '개발자': 50000, '뽑기불가': 100000 };
+    
+    function promptSellCar(index) {
+        const car = myCars[index];
+        const price = sellPrices[car.rarity] || 0;
+        
+        document.getElementById('confirm-title').textContent = '자동차 판매';
+        document.getElementById('confirm-desc').innerHTML = `<b>${car.name}</b> (${car.rarity})<br>정말 판매하시겠습니까?<br><span class="text-blue-600 font-bold text-lg">보상: ${price} 포인트</span>`;
+        document.getElementById('confirm-btn').onclick = () => {
+            closeConfirmModal();
+            sellCar(index, price);
+        };
+        
+        fadeInModal('confirm-modal', 'confirm-box');
+    }
+
+    function sellCar(index, price) {
+        myCars.splice(index, 1);
+        points += price;
+        triggerSave();
+        updatePointsUI();
+        renderGarage();
+        showModal('판매 완료!', `${price} 포인트를 획득했습니다!`, 'success');
+    }
+
+    // --- 프리미엄 자동차 팩 시스템 ---
+    const carPacks = {
+        'lambo': {
+            name: '😈 람보르기니 팩',
+            cost: 5000,
+            cars: [
+                { emoji: '🏎️', name: '람보르기니 우루스', rarity: '전설' },
+                { emoji: '🚗', name: '람보르기니 아벤타도르', rarity: '신화' },
+                { emoji: '⚡', name: '람보르기니 시안', rarity: '초월' },
+                { emoji: '😈', name: '람보르기니 베네노', rarity: '불멸' }
+            ]
+        },
+        'porsche': {
+            name: '🏎️ 포르쉐 팩',
+            cost: 6000,
+            cars: [
+                { emoji: '🚗', name: '포르쉐 파나메라', rarity: '전설' },
+                { emoji: '🏎️', name: '포르쉐 911 GT3', rarity: '신화' },
+                { emoji: '⚡', name: '포르쉐 미션 R', rarity: '개발자' },
+                { emoji: '🚀', name: '포르쉐 미션 X', rarity: '뽑기불가' }
+            ]
+        },
+        'bugatti': {
+            name: '🛸 부가티 팩',
+            cost: 8000,
+            cars: [
+                { emoji: '🏎️', name: '부가티 베이론', rarity: '신화' },
+                { emoji: '🏎️', name: '부가티 시론', rarity: '초월' },
+                { emoji: '🔥', name: '부가티 볼리드', rarity: '불멸' },
+                { emoji: '🏎️', name: '부가티 비전 그란투리스모', rarity: '뽑기불가' }
+            ]
+        },
+        'korea': {
+            name: '✨ K-프리미엄 팩',
+            cost: 3000,
+            cars: [
+                { emoji: '🏎️', name: '제네시스 G90', rarity: '전설' },
+                { emoji: '💠', name: '현대 N Vision 74', rarity: '개발자' },
+                { emoji: '✨', name: '제네시스 X 컨버터블', rarity: '개발자' }
+            ]
+        },
+        'hyper': {
+            name: '🌌 하이퍼엔드 드림 팩',
+            cost: 10000,
+            cars: [
+                { emoji: '🚀', name: '코닉세그 제스코', rarity: '초월' },
+                { emoji: '⚡', name: 'SSC 투아타라', rarity: '불멸' },
+                { emoji: '🌪️', name: '헤네시 베놈 F5', rarity: '불멸' },
+                { emoji: '🧬', name: '벤츠 비전 AVTR', rarity: '뽑기불가' }
+            ]
+        }
+    };
+
+    window.buyCarPack = function(packId) {
+        const pack = carPacks[packId];
+        if (!pack) return;
+
+        if (diamonds >= pack.cost) {
+            document.getElementById('confirm-title').textContent = '프리미엄 팩 구매';
+            document.getElementById('confirm-desc').innerHTML = `<span class="text-xl font-bold">${pack.name}</span><br>정말 구매하시겠습니까?<br><span class="text-blue-600 font-bold text-lg">비용: 💎 ${pack.cost} 개</span>`;
+            document.getElementById('confirm-btn').onclick = () => {
+                closeConfirmModal();
+                executeBuyCarPack(packId);
+            };
+            fadeInModal('confirm-modal', 'confirm-box');
+        } else {
+            showModal('다이아 부족!', `다이아가 부족합니다.<br>필요 다이아: ${pack.cost}개`, 'error');
+        }
+    };
+
+    function executeBuyCarPack(packId) {
+        const pack = carPacks[packId];
+        diamonds -= pack.cost;
+        
+        pack.cars.forEach(car => {
+            const rarityInfo = rarities.find(r => r.name === car.rarity);
+            myCars.push({
+                emoji: car.emoji,
+                name: car.name,
+                rarity: car.rarity,
+                color: rarityInfo ? rarityInfo.color : 'bg-slate-100'
+            });
+        });
+        
+        triggerSave();
+        updatePointsUI();
+        renderGarage();
+        
+        let carNames = pack.cars.map(c => c.name).join('<br> • ');
+        showModal('팩 구매 성공! 🎉', `<b>${pack.name}</b> 상품이 차고로 지급되었습니다!<br><br><div class="text-sm text-slate-500 text-left bg-slate-50 p-3 rounded-lg"> • ${carNames}</div>`, 'success');
+    }
+
+    function closeConfirmModal() {
+        fadeOutModal('confirm-modal', 'confirm-box');
+    }
+
+    function mergeCars(fromRarity, toRarity, reqCount) {
+        const indices = [];
+        for (let i = 0; i < myCars.length; i++) {
+            if (myCars[i].rarity === fromRarity) {
+                indices.push(i);
+            }
+        }
+
+        if (indices.length < reqCount) {
+            showModal('합성 실패 😥', `${fromRarity} 등급 자동차가 ${reqCount}대 필요해요.<br>(현재 보유: ${indices.length}대)`, 'error');
+            return;
+        }
+
+        for (let i = 0; i < reqCount; i++) {
+            myCars.splice(indices[indices.length - 1 - i], 1);
+        }
+
+        const targetRarity = rarities.find(r => r.name === toRarity);
+        const models = carPool[toRarity];
+        const selectedModel = models[Math.floor(Math.random() * models.length)];
+        
+        const myNewCar = {
+            emoji: selectedModel.emoji,
+            name: selectedModel.name,
+            rarity: targetRarity.name,
+            color: targetRarity.color
+        };
+
+        myCars.push(myNewCar);
+        triggerSave();
+        renderGarage();
+
+        const isLegendary = toRarity === '전설';
+        const isMythic = toRarity === '신화';
+        const isTranscendent = toRarity === '초월';
+        const isImmortal = toRarity === '불멸';
+        const isDeveloper = toRarity === '개발자';
+        const isUnpullable = toRarity === '뽑기불가';
+        
+        let highlightClass = 'text-blue-500 border border-blue-400';
+        let grandText = '';
+        
+        if (isLegendary) {
+            highlightClass = 'text-yellow-600 border border-yellow-400';
+            grandText = '<p class="text-xs text-red-500 font-bold mt-2">초대박! 전설의 자동차를 획득했습니다!</p>';
+        } else if (isMythic) {
+            highlightClass = 'text-purple-600 border border-purple-400 bg-purple-50';
+            grandText = '<p class="text-sm text-purple-600 font-bold mt-2 animate-pulse">환상적입니다! 신화 등급 탄생!</p>';
+        } else if (isTranscendent) {
+            highlightClass = 'text-yellow-400 border border-yellow-500 bg-slate-800';
+            grandText = '<p class="text-lg text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 font-bold mt-2 animate-bounce">세계 최고! 초월 등급을 완성했습니다!</p>';
+        } else if (isImmortal) {
+            highlightClass = 'text-red-400 border border-red-500 bg-red-950 shadow-lg shadow-red-500/50';
+            grandText = '<p class="text-xl text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700 font-bold mt-2 animate-ping">절대존엄! 불멸 등급 강림!</p>';
+        } else if (isDeveloper) {
+            highlightClass = 'text-green-400 border border-green-500 bg-slate-900 shadow-lg shadow-green-500/50 font-mono';
+            grandText = '<p class="text-2xl text-green-500 font-bold mt-2 animate-pulse">코드가 생명을 얻었습니다! 개발자 등급!</p>';
+        } else if (isUnpullable) {
+            highlightClass = 'text-white border border-slate-700 bg-black shadow-lg shadow-white/50 tracking-widest';
+            grandText = '<p class="text-3xl text-white font-bold mt-2 animate-bounce">존재할 수 없는 것! 뽑기불가 등급 달성!</p>';
+        }
+
+        const resultHTML = `
+            <div class="text-xl mb-4 font-bold text-slate-500">✨ 자동차 합성 성공! ✨</div>
+            <span class="text-6xl mb-2 inline-block ${(isLegendary || isMythic || isTranscendent || isImmortal || isDeveloper || isUnpullable) ? 'animate-bounce' : 'animate-pop-in'}">${myNewCar.emoji}</span><br>
+            <span class="font-bold text-slate-700 text-2xl">${myNewCar.name}</span><br>
+            <span class="text-sm font-bold bg-white px-3 py-1 rounded-full inline-block mt-2 shadow-sm ${highlightClass}">
+                ${myNewCar.rarity} 등급
+            </span>
+            ${grandText}
+        `;
+        showModal('합성 대성공! 🎉', resultHTML, 'success');
+    }
+
+    // --- Admin System Logic (관리자 기능 & 설정 메뉴 플로우) ---
+    function showDecoyModal(title, message) {
+        showModal(title, message, 'success');
+    }
+
+    // 모달 트랜지션 헬퍼
+    function fadeOutModal(modalId, boxId) {
+        const modal = document.getElementById(modalId);
+        const box = document.getElementById(boxId);
+        modal.classList.add('opacity-0');
+        box.classList.remove('scale-100');
+        box.classList.add('scale-90');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
+    
+    function fadeInModal(modalId, boxId) {
+        const modal = document.getElementById(modalId);
+        const box = document.getElementById(boxId);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            box.classList.remove('scale-90');
+            box.classList.add('scale-100');
+        }, 10);
+    }
+
+    // 설정 모달 열기/닫기
+    function openSettingsModal(fromBack = false) {
+        if (fromBack) fadeOutModal('point-menu-modal', 'point-menu-box');
+        setTimeout(() => fadeInModal('settings-modal', 'settings-box'), fromBack ? 300 : 0);
+    }
+    
+    function closeSettingsModal() {
+        fadeOutModal('settings-modal', 'settings-box');
+    }
+
+    // 포인트 메뉴 열기/닫기
+    function openPointMenu(fromBack = false) {
+        if (fromBack) fadeOutModal('point-settings-modal', 'point-settings-box');
+        else fadeOutModal('settings-modal', 'settings-box');
+        setTimeout(() => fadeInModal('point-menu-modal', 'point-menu-box'), 300);
+    }
+    
+    function closePointMenu() {
+        fadeOutModal('point-menu-modal', 'point-menu-box');
+    }
+
+    // 포인트 설정 메뉴 열기/닫기
+    function openPointSettings(fromBack = false) {
+        if (fromBack) fadeOutModal('my-point-modal', 'my-point-box');
+        else fadeOutModal('point-menu-modal', 'point-menu-box');
+        setTimeout(() => fadeInModal('point-settings-modal', 'point-settings-box'), 300);
+    }
+
+    function closePointSettings() {
+        fadeOutModal('point-settings-modal', 'point-settings-box');
+    }
+
+    // MY포인트 메뉴 열기/닫기
+    function openMyPointMenu(fromBack = false) {
+        if (fromBack) fadeOutModal('my-point-settings-modal', 'my-point-settings-box');
+        else fadeOutModal('point-settings-modal', 'point-settings-box');
+        setTimeout(() => fadeInModal('my-point-modal', 'my-point-box'), 300);
+    }
+
+    function closeMyPointMenu() {
+        fadeOutModal('my-point-modal', 'my-point-box');
+    }
+
+    // MY포인트 설정 메뉴 열기/닫기
+    function openMyPointSettings() {
+        fadeOutModal('my-point-modal', 'my-point-box');
+        setTimeout(() => fadeInModal('my-point-settings-modal', 'my-point-settings-box'), 300);
+    }
+
+    function closeMyPointSettings() {
+        fadeOutModal('my-point-settings-modal', 'my-point-settings-box');
+    }
+
+    // 관리자 비밀번호 모달 열기/닫기 (MY포인트 설정에서 진입)
+    function openAdminPwdModal() {
+        fadeOutModal('my-point-settings-modal', 'my-point-settings-box');
+        setTimeout(() => {
+            adminPwdInput.value = '';
+            fadeInModal('admin-pwd-modal', 'admin-pwd-box');
+        }, 300);
+    }
+
+    function closeAdminPwdModal() {
+        fadeOutModal('admin-pwd-modal', 'admin-pwd-box');
+        // 취소 시 이전 메뉴(MY포인트 설정)로 복귀
+        setTimeout(() => fadeInModal('my-point-settings-modal', 'my-point-settings-box'), 300);
+    }
+
+    function checkAdminPwd() {
+        // 비밀번호를 암호화(Base64)된 문자열과 비교하여 깃허브 코드상에서 숨김 처리
+        if (btoa(adminPwdInput.value) === 'NzIxMTcy') {
+            // 성공 시 비밀번호 모달 닫고 관리자 화면으로
+            fadeOutModal('admin-pwd-modal', 'admin-pwd-box');
+            setTimeout(showAdminScreen, 300);
+        } else {
+            showModal('앗!', '비밀번호가 틀렸습니다.', 'error');
+        }
+    }
+
+    function showAdminScreen() {
+        goHome(); // 다른 화면 숨기기
+        homeScreen.classList.add('hidden');
+        adminScreen.classList.remove('hidden');
+        document.getElementById('admin-point-input').value = points;
+        document.getElementById('admin-diamond-input').value = diamonds;
+        updateAdminCarList();
+    }
+
+    function adminSetPoints() {
+        const pVal = parseInt(document.getElementById('admin-point-input').value);
+        const dVal = parseInt(document.getElementById('admin-diamond-input').value);
+        if (!isNaN(pVal) && pVal >= 0) points = pVal;
+        if (!isNaN(dVal) && dVal >= 0) diamonds = dVal;
+        triggerSave();
+        updatePointsUI();
+        showModal('적용 완료', `설정이 적용되었습니다.`, 'success');
+    }
+
+    function updateAdminCarList() {
+        const rarity = document.getElementById('admin-car-rarity').value;
+        const select = document.getElementById('admin-car-select');
+        select.innerHTML = '';
+        carPool[rarity].forEach((car, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.textContent = `${car.emoji} ${car.name}`;
+            select.appendChild(opt);
+        });
+    }
+
+    function adminAddCar() {
+        const rarityName = document.getElementById('admin-car-rarity').value;
+        const carIndex = document.getElementById('admin-car-select').value;
+        const rarityInfo = rarities.find(r => r.name === rarityName);
+        const carData = carPool[rarityName][carIndex];
+
+        const myNewCar = {
+            emoji: carData.emoji,
+            name: carData.name,
+            rarity: rarityInfo.name,
+            color: rarityInfo.color
+        };
+        
+        myCars.push(myNewCar);
+        triggerSave();
+        showModal('치트 성공!', `인벤토리에 ${carData.name} (${rarityName}) 추가 완료!`, 'success');
+    }
+
+    // --- Ready Modal Helper ---
+    function showReadyModal() {
+        showModal('알림', '준비 중인 기능입니다.<br>조금만 기다려주세요!', 'error');
+    }
+
+    // --- 추가된 실제 기능들 (통계, 등급, 출석, 설정, 적금) ---
+    function showStats() {
+        closeSettingsModal();
+        const rate = totalSolved === 0 ? 0 : Math.round((correctAnswers / totalSolved) * 100);
+        const html = `
+            <div class="flex flex-col gap-4 text-left w-full mt-4 text-lg">
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <div class="mb-2">📝 푼 문제: <b class="text-blue-600">${totalSolved}</b> 개</div>
+                    <div class="mb-2">⭕ 맞춘 문제: <b class="text-green-600">${correctAnswers}</b> 개</div>
+                    <div>🎯 정답률: <b class="text-pink-500">${rate}</b> %</div>
+                </div>
+            </div>
+        `;
+        setTimeout(() => showModal('나의 학습 통계 📊', html, 'success', null, '닫기'), 300);
+    }
+
+    function showRank() {
+        closeSettingsModal();
+        let rankName = '수학 꿈나무 🌱';
+        if (points >= 100000) rankName = '뽑기 마스터 👑';
+        else if (points >= 50000) rankName = '수학의 신 ⚡';
+        else if (points >= 10000) rankName = '수학 천재 🎓';
+        else if (points >= 5000) rankName = '수학 고수 ⚔️';
+        else if (points >= 1000) rankName = '수학 우등생 🏅';
+
+        const html = `
+            <div class="flex flex-col gap-4 text-center w-full mt-4 text-lg">
+                <div class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 shadow-inner">
+                    <div class="text-sm text-slate-500 mb-1">현재 당신의 등급은</div>
+                    <div class="text-3xl font-bold text-yellow-600 animate-pulse">${rankName}</div>
+                    <div class="text-sm text-slate-500 mt-4">(포인트 달성량 기준)</div>
+                </div>
+            </div>
+        `;
+        setTimeout(() => showModal('내 등급 보기 🏅', html, 'success', null, '멋지네요!'), 300);
+    }
+
+    function showHoF() {
+        closeSettingsModal();
+        const myRankPct = Math.max(1, 99 - Math.floor(points/1000));
+        const html = `
+            <div class="flex flex-col gap-2 text-left w-full mt-4 text-[15px]">
+                <div class="bg-yellow-100 p-3 rounded-xl shadow-sm">🥇 1위: 수학의신 (999,999P)</div>
+                <div class="bg-slate-200 p-3 rounded-xl shadow-sm">🥈 2위: 가챠마스터 (500,000P)</div>
+                <div class="bg-orange-100 p-3 rounded-xl shadow-sm">🥉 3위: 아인슈타인 (250,000P)</div>
+                <div class="text-center text-slate-400 my-1">...</div>
+                <div class="bg-blue-100 p-3 rounded-xl font-bold border-2 border-blue-300 text-blue-800">
+                    👉 나의 순위: 상위 ${myRankPct}%
+                </div>
+            </div>
+        `;
+        setTimeout(() => showModal('명예의 전당 🏆', html, 'success', null, '닫기'), 300);
+    }
+
+    function doAttendance() {
+        closePointMenu();
+        const today = new Date().toDateString();
+        setTimeout(() => {
+            if (attendanceDate === today) {
+                showModal('출석체크', '오늘은 이미 출석하셨습니다!<br>내일 다시 와주세요. 😊', 'error', null, '확인');
+            } else {
+                attendanceDate = today;
+                points += 100; // 출석 보상 100포인트
+                triggerSave();
+                updatePointsUI();
+                showModal('출석체크 완료! 📅', '출석 보상으로 <b class="text-yellow-600">100 포인트</b>를 받았습니다!', 'success');
+            }
+        }, 300);
+    }
+
+    function toggleSavings() {
+        const btn = document.getElementById('savings-btn');
+        if (savingsActive) {
+            savingsActive = false;
+            clearInterval(savingsInterval);
+            btn.innerHTML = '🏦 포인트 적금 가입';
+            btn.classList.remove('btn-pink');
+            btn.classList.add('btn-white', 'text-green-600');
+            showModal('적금 해지', '포인트 적금을 중지했습니다.', 'error', null, '확인');
+        } else {
+            savingsActive = true;
+            btn.innerHTML = '🏦 포인트 적금 해지';
+            btn.classList.remove('btn-white', 'text-green-600');
+            btn.classList.add('btn-pink');
+            
+            savingsInterval = setInterval(() => {
+                const earned = rand(10, 20);
+                points += earned;
+                triggerSave();
+                updatePointsUI();
+            }, 60000); // 1분(60초)마다 포인트 지급
+            
+            closePointMenu();
+            setTimeout(() => {
+                showModal('적금 가입 완료! 🏦', '이제 놀이터를 켜두시면 <b>1분마다 10~20 포인트</b>가 자동으로 쌓입니다!<br>(새로고침하면 중지됩니다)', 'success', null, '확인');
+            }, 300);
+        }
+    }
+
+    function openSoundSettings() {
+        closeSettingsModal();
+        const html = `
+            <div class="flex flex-col gap-4 w-full mt-4">
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <span class="text-xl font-bold text-slate-700">배경음악 (BGM)</span>
+                    <button onclick="toggleSound('bgm', this)" class="btn-3d ${bgmEnabled ? 'btn-green' : 'btn-slate text-white bg-slate-400'} px-6 py-2 rounded-xl text-lg">${bgmEnabled ? 'ON' : 'OFF'}</button>
+                </div>
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <span class="text-xl font-bold text-slate-700">효과음 (SFX)</span>
+                    <button onclick="toggleSound('sfx', this)" class="btn-3d ${sfxEnabled ? 'btn-green' : 'btn-slate text-white bg-slate-400'} px-6 py-2 rounded-xl text-lg">${sfxEnabled ? 'ON' : 'OFF'}</button>
+                </div>
+            </div>
+        `;
+        setTimeout(() => showModal('소리 설정 🔊', html, 'success', null, '저장 및 닫기'), 300);
+    }
+    
+    window.toggleSound = function(type, btnEl) {
+        if (type === 'bgm') {
+            bgmEnabled = !bgmEnabled;
+            btnEl.textContent = bgmEnabled ? 'ON' : 'OFF';
+            btnEl.className = `btn-3d ${bgmEnabled ? 'btn-green' : 'btn-slate text-white bg-slate-400'} px-6 py-2 rounded-xl text-lg`;
+        } else {
+            sfxEnabled = !sfxEnabled;
+            btnEl.textContent = sfxEnabled ? 'ON' : 'OFF';
+            btnEl.className = `btn-3d ${sfxEnabled ? 'btn-green' : 'btn-slate text-white bg-slate-400'} px-6 py-2 rounded-xl text-lg`;
+        }
+        triggerSave();
+    };
+
+    function openScreenSettings() {
+        closeSettingsModal();
+        const html = `
+            <div class="flex flex-wrap justify-center gap-4 w-full mt-6">
+                <button onclick="applyTheme('#f0f9ff', '#bae6fd')" class="w-16 h-16 rounded-full bg-blue-100 border-4 border-blue-300 shadow-md hover:scale-110 transition-transform"></button>
+                <button onclick="applyTheme('#fdf2f8', '#fbcfe8')" class="w-16 h-16 rounded-full bg-pink-100 border-4 border-pink-300 shadow-md hover:scale-110 transition-transform"></button>
+                <button onclick="applyTheme('#f0fdf4', '#bbf7d0')" class="w-16 h-16 rounded-full bg-green-100 border-4 border-green-300 shadow-md hover:scale-110 transition-transform"></button>
+                <button onclick="applyTheme('#fefce8', '#fef08a')" class="w-16 h-16 rounded-full bg-yellow-100 border-4 border-yellow-300 shadow-md hover:scale-110 transition-transform"></button>
+                <button onclick="applyTheme('#f3f4f6', '#d1d5db')" class="w-16 h-16 rounded-full bg-gray-100 border-4 border-gray-300 shadow-md hover:scale-110 transition-transform"></button>
+            </div>
+            <p class="mt-6 text-slate-500 font-bold">원하는 배경 색상을 선택하세요!</p>
+        `;
+        setTimeout(() => showModal('화면 테마 설정 🖥️', html, 'success', null, '닫기'), 300);
+    }
+    
+    window.applyTheme = function(bg, dot) {
+        currentThemeBg = bg;
+        currentThemeDot = dot;
+        document.body.style.backgroundColor = bg;
+        document.body.style.backgroundImage = `radial-gradient(${dot} 2px, transparent 2px)`;
+        triggerSave();
+    };
+
+    // --- Coupon & Diamond Shop Systems ---
+    const couponDB = {
+        'MATH2026': { type: 'point', val: 500, msg: '500 포인트가 지급되었습니다!' },
+        'DIAMOND': { type: 'diamond', val: 10, msg: '다이아 10개가 지급되었습니다!' },
+        'GACHA777': { type: 'point', val: 777, msg: '777 포인트가 지급되었습니다!' },
+        'SECRET100': { type: 'diamond', val: 100, msg: '비밀 쿠폰! 다이아 100개가 지급되었습니다!' },
+        'SUPERCAR': { type: 'point', val: 1000, msg: '1,000 포인트가 지급되었습니다!' },
+        'LUCKYDAY': { type: 'diamond', val: 30, msg: '다이아 30개가 지급되었습니다!' },
+        'MATHKING': { type: 'diamond', val: 50, msg: '다이아 50개가 지급되었습니다!' },
+        'HELLO2026': { type: 'point', val: 300, msg: '300 포인트가 지급되었습니다!' },
+        'RICHSTUDENT': { type: 'point', val: 2000, msg: '2,000 포인트가 지급되었습니다!' },
+        'LEGENDARY': { type: 'diamond', val: 50, msg: '다이아 50개가 지급되었습니다!' }
+    };
+
+    function openCouponModal() {
+        closePointSettings();
+        document.getElementById('coupon-input').value = '';
+        fadeInModal('coupon-modal', 'coupon-box');
+    }
+
+    function closeCouponModal() {
+        fadeOutModal('coupon-modal', 'coupon-box');
+    }
+
+    function submitCoupon() {
+        const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+        if (!code) {
+            showModal('앗!', '쿠폰 코드를 입력해주세요.', 'error');
+            return;
+        }
+        if (usedCoupons.includes(code)) {
+            showModal('앗!', '이미 사용한 쿠폰입니다.', 'error');
+            return;
+        }
+        
+        if (couponDB[code]) {
+            const reward = couponDB[code];
+            if (reward.type === 'point') points += reward.val;
+            else if (reward.type === 'diamond') diamonds += reward.val;
+            
+            usedCoupons.push(code);
+            triggerSave();
+            updatePointsUI();
+            document.getElementById('coupon-input').value = '';
+            closeCouponModal();
+            setTimeout(() => showModal('쿠폰 등록 성공! 🎉', reward.msg, 'success'), 300);
+        } else {
+            showModal('앗!', '유효하지 않은 쿠폰 번호입니다.', 'error');
+        }
+    }
+
+    function openDiamondShop() {
+        fadeInModal('diamond-shop-modal', 'diamond-shop-box');
+    }
+
+    function closeDiamondShop() {
+        fadeOutModal('diamond-shop-modal', 'diamond-shop-box');
+    }
+
+    function buyDiamonds(amount) {
+        const costs = { 1: 100, 5: 500, 10: 1000 };
+        const cost = costs[amount];
+        if (points >= cost) {
+            points -= cost;
+            diamonds += amount;
+            triggerSave();
+            updatePointsUI();
+            showModal('교환 성공! 💎', `포인트로 다이아 ${amount}개를 구매했습니다!`, 'success');
+        } else {
+            showModal('앗!', '포인트가 부족합니다.<br>문제를 풀고 포인트를 모아오세요!', 'error');
+        }
+    }
+
+    // --- 서프라이즈 딜 (깜짝 상점) 시스템 ---
+    let surpriseCallback = null;
+    let surpriseCar = null;
+    let surprisePrice = 0;
+
+    function triggerManualSurpriseDeal() {
+        checkSurpriseDeal(null, true);
+    }
+
+    function checkSurpriseDeal(callback, force = false) {
+        // 문제 맞췄을 때 15% 확률로 발동 (또는 메뉴에서 수동 진입)
+        if (force || Math.random() < 0.15) {
+            surpriseCallback = callback;
+            
+            // 전설(0), 신화(1), 초월(2), 불멸(3) 중 무작위 선택
+            const tiers = ['전설', '신화', '초월', '불멸'];
+            const prices = [10, 30, 80, 150]; // 다이아 가격
+            const rIdx = rand(0, 3);
+            const targetTier = tiers[rIdx];
+            surprisePrice = prices[rIdx];
+
+            const rarityInfo = rarities.find(r => r.name === targetTier);
+            const models = carPool[targetTier];
+            const selectedModel = models[Math.floor(Math.random() * models.length)];
+
+            surpriseCar = {
+                emoji: selectedModel.emoji,
+                name: selectedModel.name,
+                rarity: rarityInfo.name,
+                color: rarityInfo.color
+            };
+
+            const display = document.getElementById('surprise-car-display');
+            display.className = `flex flex-col items-center justify-center py-6 px-4 rounded-2xl border-4 shadow-md w-full mb-6 ${surpriseCar.color}`;
+            display.innerHTML = `
+                <div class="text-6xl mb-3 floating">${surpriseCar.emoji}</div>
+                <div class="text-xl font-bold text-slate-700 text-center break-keep">${surpriseCar.name}</div>
+                <div class="text-sm text-slate-700 bg-white/80 font-bold px-3 py-1 rounded-full mt-2">${surpriseCar.rarity} 등급</div>
+            `;
+
+            document.getElementById('surprise-buy-btn').innerHTML = `💎 ${surprisePrice}개로 구매`;
+            document.getElementById('surprise-buy-btn').onclick = buySurpriseDeal;
+
+            fadeInModal('surprise-deal-modal', 'surprise-deal-box');
+        } else {
+            // 콜백이 존재할 때만 실행하도록 하여 에러 방지
+            if (callback) callback();
+        }
+    }
+
+    function declineSurpriseDeal() {
+        fadeOutModal('surprise-deal-modal', 'surprise-deal-box');
+        setTimeout(() => {
+            if (surpriseCallback) surpriseCallback();
+            surpriseCallback = null;
+        }, 300);
+    }
+
+    function buySurpriseDeal() {
+        if (diamonds >= surprisePrice) {
+            diamonds -= surprisePrice;
+            myCars.push(surpriseCar);
+            triggerSave();
+            updatePointsUI();
+            
+            fadeOutModal('surprise-deal-modal', 'surprise-deal-box');
+            setTimeout(() => {
+                showModal('구매 성공! 🎉', `깜짝 딜에서 <b>${surpriseCar.name}</b>을(를) 구매했습니다!<br>차고에서 확인하세요.`, 'success', () => {
+                    if (surpriseCallback) surpriseCallback();
+                    surpriseCallback = null;
+                });
+            }, 300);
+        } else {
+            // 다이아가 부족하면 커스텀 모달 위에 경고 표시 후 포기 처리
+            alert('다이아가 부족합니다. (상점에서 포인트를 다이아로 바꿀 수 있어요!)');
+        }
+    }
+
+    // --- Custom Modal System ---
+    function showModal(title, desc, type, callback = null, btnText = '확인') {
+        modalTitle.textContent = title;
+        modalDesc.innerHTML = desc; 
+        modalCallback = callback;
+        modalBtn.textContent = btnText;
+
+        if (type === 'success') {
+            modalIcon.textContent = '⭕';
+            modalTitle.className = 'text-3xl font-bold mb-2 text-blue-500';
+            modalBtn.className = 'btn-3d btn-blue text-xl px-8 py-3 rounded-2xl w-full font-bold';
+        } else if (type === 'error') {
+            modalIcon.textContent = '❌';
+            modalTitle.className = 'text-3xl font-bold mb-2 text-pink-500';
+            modalBtn.className = 'btn-3d btn-pink text-xl px-8 py-3 rounded-2xl w-full font-bold';
+            
+            if (title === '앗!') {
+                 modalIcon.textContent = '👀';
+                 modalTitle.className = 'text-3xl font-bold mb-2 text-orange-400';
+                 modalBtn.className = 'btn-3d btn-yellow text-xl px-8 py-3 rounded-2xl w-full font-bold text-slate-800';
+            }
+        }
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modalBox.classList.remove('scale-90');
+            modalBox.classList.add('scale-100');
+        }, 10);
+
+        modalBtn.onclick = closeModal;
+    }
+
+    function closeModal() {
+        modal.classList.add('opacity-0');
+        modalBox.classList.remove('scale-100');
+        modalBox.classList.add('scale-90');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (modalCallback) {
+                modalCallback();
+                modalCallback = null;
+            }
+        }, 300);
+    }
+
+    // Start app
+    window.onload = init;
+</script>
+</body>
+</html>
